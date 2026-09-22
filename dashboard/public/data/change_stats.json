@@ -1,0 +1,29 @@
+{
+  "summary": {
+    "study_area_km2": 842.6,
+    "changed_area_km2": 47.3,
+    "changed_pct": 5.6,
+    "persistent_change_km2": 31.8,
+    "model_accuracy": 0.87,
+    "kappa": 0.82,
+    "oob_error": 0.13
+  },
+  "classes": [
+    { "id": 0, "name": "No Change", "color": "#2d3436", "area_km2": 795.3, "pct": 94.4 },
+    { "id": 1, "name": "Erosion", "color": "#e17055", "area_km2": 8.2, "pct": 1.0 },
+    { "id": 2, "name": "Deposition", "color": "#fdcb6e", "area_km2": 12.4, "pct": 1.5 },
+    { "id": 3, "name": "Vegetation Loss", "color": "#00b894", "area_km2": 6.1, "pct": 0.7 },
+    { "id": 4, "name": "Water Expansion", "color": "#0984e3", "area_km2": 18.7, "pct": 2.2 },
+    { "id": 5, "name": "Built-up Alteration", "color": "#6c5ce7", "area_km2": 1.9, "pct": 0.2 }
+  ],
+  "periods": {
+    "pre": { "start": "2026-06-01", "end": "2026-07-15", "label": "Pre-event baseline" },
+    "post_immediate": { "start": "2026-08-01", "end": "2026-08-20", "label": "Immediate post-flood" },
+    "post_persistence": { "start": "2026-09-01", "end": "2026-09-20", "label": "Persistence check" }
+  },
+  "hotspots": [
+    { "name": "Bhoti Koshi confluence", "lat": 27.95, "lng": 85.98, "severity": "high" },
+    { "name": "Trishuli mid-reach", "lat": 27.82, "lng": 85.72, "severity": "medium" },
+    { "name": "Downstream deposition fan", "lat": 27.68, "lng": 85.55, "severity": "high" }
+  ]
+}
