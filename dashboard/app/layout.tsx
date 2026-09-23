@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Post-Flood LULC Dashboard | Nepal EO Hackathon",
+  title: "TerraTrace | Post-Flood LULC Dashboard",
   description:
-    "Machine learning change detection and explainable AI dashboard for Nepal August 2026 flood event",
+    "TerraTrace — machine learning change detection and LIME explainable AI for Nepal August 2026 flood event",
 };
 
 export default function RootLayout({

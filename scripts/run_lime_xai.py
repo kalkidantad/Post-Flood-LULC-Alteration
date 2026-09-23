@@ -26,11 +26,9 @@ LABELS = json.loads((Path(__file__).parent / "feature_labels.json").read_text())
 
 CLASS_NAMES = {
     0: "No Change",
-    1: "Erosion",
-    2: "Deposition",
-    3: "Vegetation Loss",
-    4: "Water Expansion",
-    5: "Built-up Alteration",
+    1: "Newly Inundated",
+    2: "Vegetation Loss",
+    3: "Built-up Alteration",
 }
 
 META_COLS = {

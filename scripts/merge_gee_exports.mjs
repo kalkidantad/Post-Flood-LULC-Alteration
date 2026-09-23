@@ -119,11 +119,12 @@ function merge() {
 
   const mapCenter = mapRows[0];
   const config = {
+    brand: "TerraTrace",
     title: "Post-Flood LULC Alteration Dashboard",
     subtitle: "Nepal August 2026 Flash-Flood / Debris-Flow — Bhoti Koshi & Trishuli",
     mapCenter: [Number(mapCenter.lat), Number(mapCenter.lng)],
     mapZoom: Number(mapCenter.zoom || 10),
-    dataSources: ["Landsat 9", "Sentinel-2"],
+    dataSources: ["Landsat 9"],
     mlModel: `Random Forest (${metrics.rf_trees} trees)`,
     xaiMethod: "LIME (Local Interpretable Model-agnostic Explanations)",
     eeAssets: {

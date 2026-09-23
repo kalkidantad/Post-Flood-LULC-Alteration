@@ -74,7 +74,8 @@ export default function DashboardClient({
       </main>
 
       <footer className="border-t border-surface-border px-6 py-3 text-center text-xs text-gray-500">
-        SPARK 4.0 Nepal EO Hackathon · Landsat 9 + Sentinel-2 · RF + LIME XAI
+        <span className="font-semibold tracking-wide text-gray-400">TerraTrace</span>
+        {" · "}SPARK 4.0 Nepal EO Hackathon · Landsat 9 · RF + LIME XAI
       </footer>
     </div>
   );

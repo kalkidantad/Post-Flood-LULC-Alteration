@@ -22,11 +22,19 @@ interface MapViewProps {
   limeSamples?: LimeLocalExplanation[];
 }
 
-function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
+/** Fix map size after dynamic mount — avoids Leaflet pane errors */
+function MapResizeFix() {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
+    const timer = window.setTimeout(() => {
+      try {
+        map.invalidateSize();
+      } catch {
+        // map unmounted
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [map]);
   return null;
 }
 
@@ -45,6 +53,10 @@ function classColor(classes: ChangeStats["classes"], classId?: number) {
   return classes.find((c) => c.id === classId)?.color ?? "#636e72";
 }
 
+function safeCoord(value: number | undefined, fallback: number) {
+  return Number.isFinite(value) ? (value as number) : fallback;
+}
+
 export default function MapView({ config, stats, limeSamples = [] }: MapViewProps) {
   const isReal = config.dataSource === "real";
 
@@ -55,9 +67,15 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
   const [showLimeSamples, setShowLimeSamples] = useState(true);
 
   const center = useMemo(
-    () => [config.mapCenter[0], config.mapCenter[1]] as [number, number],
+    (): [number, number] => [
+      safeCoord(config.mapCenter?.[0], 27.85),
+      safeCoord(config.mapCenter?.[1], 85.75),
+    ],
     [config.mapCenter]
   );
+
+  const zoom = safeCoord(config.mapZoom, 10);
+  const mapKey = `${center[0].toFixed(3)}-${center[1].toFixed(3)}-${zoom}`;
 
   const eeTileUrl = process.env.NEXT_PUBLIC_EE_TILE_URL;
 
@@ -72,12 +90,13 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
   return (
     <div className="relative h-full min-h-[420px] w-full overflow-hidden rounded-lg border border-surface-border">
       <MapContainer
+        key={mapKey}
         center={center}
-        zoom={config.mapZoom}
+        zoom={zoom}
         scrollWheelZoom
         className="h-full w-full"
       >
-        <MapController center={center} zoom={config.mapZoom} />
+        <MapResizeFix />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -91,7 +110,6 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
           />
         )}
 
-        {/* Real data: hotspot markers from GEE export */}
         {isReal &&
           showHotspots &&
           filteredHotspots.map((spot, i) => (
@@ -120,7 +138,6 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
             </CircleMarker>
           ))}
 
-        {/* LIME sample locations (click → see chart below) */}
         {showLimeSamples &&
           limeSamples.map((s) => (
             <CircleMarker
@@ -144,7 +161,6 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
             </CircleMarker>
           ))}
 
-        {/* Sample/demo mode: synthetic markers when not using real GEE data */}
         {!isReal &&
           stats.classes
             .filter((c) => c.id !== 0 && visibleLayers[c.id])

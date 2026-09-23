@@ -47,6 +47,7 @@ export interface ChangeStats {
 }
 
 export interface DashboardConfig {
+  brand?: string;
   title: string;
   subtitle: string;
   mapCenter: [number, number];
