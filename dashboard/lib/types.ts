@@ -27,6 +27,26 @@ export interface Hotspot {
   hotspot_score?: number;
 }
 
+export interface TerraTraceKPI {
+  newly_inundated_km2: number;
+  total_lulc_change_km2: number;
+  agriculture_to_water_km2: number;
+  vegetation_to_water_km2: number;
+  builtup_to_water_km2: number;
+  study_area_km2: number;
+  inundated_water_km2?: number;
+  vegetation_loss_km2?: number;
+  veg_to_bare_soil_km2?: number;
+  agri_to_bare_soil_km2?: number;
+}
+
+export interface LULCTransition {
+  pre: string;
+  post: string;
+  emoji: string;
+  area_km2: number;
+}
+
 export interface ChangeStats {
   summary: {
     study_area_km2: number;
@@ -37,6 +57,8 @@ export interface ChangeStats {
     kappa: number;
     oob_error: number;
   };
+  kpi: TerraTraceKPI;
+  transitions: LULCTransition[];
   classes: ChangeClass[];
   periods: {
     pre: Period;
@@ -57,6 +79,7 @@ export interface DashboardConfig {
   xaiMethod: string;
   eeAssets: Record<string, string>;
   dataSource?: "sample" | "real";
+  eventDate?: string;
 }
 
 export interface LimeFeatureWeight {
@@ -84,5 +107,14 @@ export interface LimeExplanations {
   global: LimeFeatureWeight[];
   local: LimeLocalExplanation[];
 }
+
+export type MapLayerGroup =
+  | "base_pre"
+  | "base_flood"
+  | "flood_indices"
+  | "binary_flood"
+  | "lulc"
+  | "transformation"
+  | "hotspots";
 
 export type TimePeriod = "pre" | "post_immediate" | "post_persistence";

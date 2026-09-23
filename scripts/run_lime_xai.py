@@ -29,6 +29,7 @@ CLASS_NAMES = {
     1: "Newly Inundated",
     2: "Vegetation Loss",
     3: "Built-up Alteration",
+    4: "Bare Soil Exposure",
 }
 
 META_COLS = {

@@ -1,53 +1,52 @@
 {
-  "method": "LIME TabularExplainer on Random Forest (sample — replace via pipeline)",
-  "sklearn_validation_accuracy": 0.87,
+  "method": "LIME TabularExplainer on Random Forest (delta-only features, sample data)",
+  "sklearn_validation_accuracy": 0.79,
   "samples_explained": 3,
   "global": [
-    { "feature": "dPers_S2_NDWI", "label": "S2 NDWI Δ (persist)", "importance": 0.21, "importance_pct": 19.5 },
-    { "feature": "dPers_S2_NDVI", "label": "S2 NDVI Δ (persist)", "importance": 0.18, "importance_pct": 16.7 },
-    { "feature": "dImm_S2_NDWI", "label": "S2 NDWI Δ (immediate)", "importance": 0.14, "importance_pct": 13.0 },
-    { "feature": "dPers_L9_NDWI", "label": "L9 NDWI Δ (persist)", "importance": 0.12, "importance_pct": 11.1 },
-    { "feature": "dPers_S2_BSI", "label": "S2 BSI Δ (persist)", "importance": 0.10, "importance_pct": 9.3 }
+    { "feature": "Delta_MNDWI", "label": "MNDWI Δ", "importance": 0.28, "importance_pct": 32.1 },
+    { "feature": "Delta_NDWI", "label": "NDWI Δ", "importance": 0.22, "importance_pct": 25.3 },
+    { "feature": "Delta_NDVI", "label": "NDVI Δ", "importance": 0.14, "importance_pct": 16.1 },
+    { "feature": "Delta_BSI", "label": "BSI Δ (bare soil)", "importance": 0.12, "importance_pct": 13.8 },
+    { "feature": "Delta_NDBI", "label": "NDBI Δ", "importance": 0.11, "importance_pct": 12.6 }
   ],
   "local": [
     {
-      "id": "sample_4_0",
-      "class_id": 4,
-      "class_name": "Water Expansion",
-      "lat": 27.95,
-      "lng": 85.98,
-      "predicted_class": 4,
-      "features": [
-        { "feature": "dPers_S2_NDWI", "label": "S2 NDWI Δ (persist)", "weight": 0.42 },
-        { "feature": "dImm_S2_NDWI", "label": "S2 NDWI Δ (immediate)", "weight": 0.31 },
-        { "feature": "dPers_S2_NDVI", "label": "S2 NDVI Δ (persist)", "weight": -0.18 },
-        { "feature": "S2_NDWI", "label": "S2 NDWI (post)", "weight": 0.12 }
-      ]
-    },
-    {
-      "id": "sample_1_1",
+      "id": "sample_1_0",
       "class_id": 1,
-      "class_name": "Erosion",
-      "lat": 27.82,
-      "lng": 85.72,
+      "class_name": "Newly Inundated",
+      "lat": 27.92,
+      "lng": 85.88,
       "predicted_class": 1,
       "features": [
-        { "feature": "dPers_S2_NDVI", "label": "S2 NDVI Δ (persist)", "weight": -0.38 },
-        { "feature": "dPers_S2_BSI", "label": "S2 BSI Δ (persist)", "weight": 0.29 },
-        { "feature": "dPers_L9_NBR", "label": "L9 NBR Δ (persist)", "weight": 0.15 }
+        { "feature": "Delta_MNDWI", "label": "MNDWI Δ", "weight": 0.45 },
+        { "feature": "Delta_NDWI", "label": "NDWI Δ", "weight": 0.32 },
+        { "feature": "Delta_NDVI", "label": "NDVI Δ", "weight": -0.18 }
       ]
     },
     {
-      "id": "sample_2_2",
+      "id": "sample_2_1",
       "class_id": 2,
-      "class_name": "Deposition",
-      "lat": 27.68,
-      "lng": 85.55,
+      "class_name": "Vegetation Loss",
+      "lat": 27.86,
+      "lng": 85.79,
       "predicted_class": 2,
       "features": [
-        { "feature": "dPers_S2_BSI", "label": "S2 BSI Δ (persist)", "weight": 0.35 },
-        { "feature": "dPers_S2_NDVI", "label": "S2 NDVI Δ (persist)", "weight": -0.22 },
-        { "feature": "dImm_L9_NDVI", "label": "L9 NDVI Δ (immediate)", "weight": -0.11 }
+        { "feature": "Delta_NDVI", "label": "NDVI Δ", "weight": -0.41 },
+        { "feature": "Delta_BSI", "label": "BSI Δ (bare soil)", "weight": 0.28 },
+        { "feature": "Delta_MNDWI", "label": "MNDWI Δ", "weight": 0.12 }
+      ]
+    },
+    {
+      "id": "sample_4_2",
+      "class_id": 4,
+      "class_name": "Bare Soil Exposure",
+      "lat": 27.81,
+      "lng": 85.71,
+      "predicted_class": 4,
+      "features": [
+        { "feature": "Delta_BSI", "label": "BSI Δ (bare soil)", "weight": 0.38 },
+        { "feature": "Delta_NDVI", "label": "NDVI Δ", "weight": -0.25 },
+        { "feature": "Delta_NDBI", "label": "NDBI Δ", "weight": 0.14 }
       ]
     }
   ]

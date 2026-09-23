@@ -16,13 +16,14 @@ const ROOT = path.join(__dirname, "..");
 const RAW = path.join(ROOT, "data", "raw");
 const OUT = path.join(ROOT, "dashboard", "public", "data");
 
-function findFile(prefix) {
+function findFile(prefix, optional = false) {
   if (!fs.existsSync(RAW)) {
     throw new Error(`Missing folder: data/raw/ — download GEE exports there first.`);
   }
   const files = fs.readdirSync(RAW);
   const match = files.find((f) => f.includes(prefix));
   if (!match) {
+    if (optional) return null;
     throw new Error(`Could not find export matching "${prefix}" in data/raw/`);
   }
   return path.join(RAW, match);
@@ -36,7 +37,7 @@ function readJson(filePath) {
 function fcToRows(data) {
   if (Array.isArray(data)) return data;
   if (data.type === "FeatureCollection") {
-    return data.features.map((f) => ({ ...f.properties, ...(f.geometry ? {} : {}) }));
+    return data.features.map((f) => ({ ...f.properties }));
   }
   if (data.features) {
     return data.features.map((f) => f.properties);
@@ -48,6 +49,41 @@ function ensureOutDir() {
   fs.mkdirSync(OUT, { recursive: true });
 }
 
+function buildTransitions(metrics) {
+  return [
+    {
+      pre: "Agriculture",
+      post: "Water",
+      emoji: "🌊",
+      area_km2: round(Number(metrics.agri_to_water_km2 || 0), 2),
+    },
+    {
+      pre: "Vegetation",
+      post: "Water",
+      emoji: "🌊",
+      area_km2: round(Number(metrics.veg_to_water_km2 || 0), 2),
+    },
+    {
+      pre: "Built-up",
+      post: "Water",
+      emoji: "🌊",
+      area_km2: round(Number(metrics.built_to_water_km2 || metrics.builtup_to_water_km2 || 0), 2),
+    },
+    {
+      pre: "Vegetation",
+      post: "Bare Soil",
+      emoji: "🟤",
+      area_km2: round(Number(metrics.veg_to_bare_soil_km2 || 0), 2),
+    },
+    {
+      pre: "Agriculture",
+      post: "Bare Soil",
+      emoji: "🟤",
+      area_km2: round(Number(metrics.agri_to_bare_soil_km2 || 0), 2),
+    },
+  ].filter((t) => t.area_km2 > 0);
+}
+
 function merge() {
   ensureOutDir();
 
@@ -56,8 +92,28 @@ function merge() {
   const hotspotRows = fcToRows(readJson(findFile("06_dashboard_hotspots")));
   const mapRows = fcToRows(readJson(findFile("07_dashboard_map_center")));
 
+  const kpiPath = findFile("09_dashboard_kpis", true);
+  const kpiRows = kpiPath ? fcToRows(readJson(kpiPath)) : [];
+  const kpiRaw = kpiRows[0] || {};
+
   const metrics = metricsRows[0];
-  const studyAreaKm2 = Number(metrics.study_area_km2);
+  const studyAreaKm2 = Number(kpiRaw.study_area_km2 || metrics.study_area_km2);
+
+  const kpi = {
+    newly_inundated_km2: round(Number(kpiRaw.newly_inundated_km2 || metrics.lulc_new_water_km2 || 0), 2),
+    total_lulc_change_km2: round(Number(kpiRaw.total_lulc_change_km2 || metrics.lulc_change_km2 || 0), 2),
+    agriculture_to_water_km2: round(Number(kpiRaw.agriculture_to_water_km2 || metrics.agri_to_water_km2 || 0), 2),
+    vegetation_to_water_km2: round(Number(kpiRaw.vegetation_to_water_km2 || metrics.veg_to_water_km2 || 0), 2),
+    builtup_to_water_km2: round(
+      Number(kpiRaw.builtup_to_water_km2 || metrics.built_to_water_km2 || 0),
+      2
+    ),
+    study_area_km2: round(studyAreaKm2, 1),
+    inundated_water_km2: round(Number(kpiRaw.inundated_water_km2 || metrics.flood_km2 || 0), 2),
+    vegetation_loss_km2: round(Number(kpiRaw.vegetation_loss_km2 || 0), 2),
+    veg_to_bare_soil_km2: round(Number(kpiRaw.veg_to_bare_soil_km2 || metrics.veg_to_bare_soil_km2 || 0), 2),
+    agri_to_bare_soil_km2: round(Number(kpiRaw.agri_to_bare_soil_km2 || metrics.agri_to_bare_soil_km2 || 0), 2),
+  };
 
   const classes = areaRows
     .map((row) => ({
@@ -79,16 +135,23 @@ function merge() {
     2
   );
 
+  const transitions = buildTransitions({ ...metrics, ...kpiRaw });
+
   const changeStats = {
     summary: {
       study_area_km2: round(studyAreaKm2, 1),
-      changed_area_km2: changedAreaKm2,
-      changed_pct: studyAreaKm2 > 0 ? round((changedAreaKm2 / studyAreaKm2) * 100, 1) : 0,
-      persistent_change_km2: changedAreaKm2,
+      changed_area_km2: kpi.total_lulc_change_km2 || changedAreaKm2,
+      changed_pct:
+        studyAreaKm2 > 0
+          ? round(((kpi.total_lulc_change_km2 || changedAreaKm2) / studyAreaKm2) * 100, 1)
+          : 0,
+      persistent_change_km2: kpi.total_lulc_change_km2 || changedAreaKm2,
       model_accuracy: round(Number(metrics.validation_accuracy), 3),
       kappa: round(Number(metrics.kappa), 3),
       oob_error: round(Number(metrics.oob_error), 3),
     },
+    kpi,
+    transitions: transitions.length > 0 ? transitions : buildTransitions(kpi),
     classes,
     periods: {
       pre: {
@@ -99,12 +162,12 @@ function merge() {
       post_immediate: {
         start: metrics.post_immediate_start,
         end: metrics.post_immediate_end,
-        label: "Immediate post-flood",
+        label: "Flood event (26 Aug 2026)",
       },
       post_persistence: {
         start: metrics.post_persist_start,
         end: metrics.post_persist_end,
-        label: "Persistence check",
+        label: "Post-flood window",
       },
     },
     hotspots: hotspotRows.slice(0, 15).map((h, i) => ({
@@ -120,22 +183,21 @@ function merge() {
   const mapCenter = mapRows[0];
   const config = {
     brand: "TerraTrace",
-    title: "Post-Flood LULC Alteration Dashboard",
-    subtitle: "Nepal August 2026 Flash-Flood / Debris-Flow — Bhoti Koshi & Trishuli",
+    title: "TerraTrace — AI-Powered LULC Change & Flood Transformation",
+    subtitle: "Bhote Koshi Trishuli Narayani corridor, Nepal · Event: 26 August 2026",
     mapCenter: [Number(mapCenter.lat), Number(mapCenter.lng)],
-    mapZoom: Number(mapCenter.zoom || 10),
-    dataSources: ["Landsat 9"],
-    mlModel: `Random Forest (${metrics.rf_trees} trees)`,
-    xaiMethod: "LIME (Local Interpretable Model-agnostic Explanations)",
+    mapZoom: Number(mapCenter.zoom || 11),
+    dataSources: ["Landsat 9", "JRC Global Surface Water"],
+    mlModel: `Random Forest (${metrics.rf_trees} trees, spatial hold-out)`,
+    xaiMethod: "LIME + rule-based inundation logic",
     eeAssets: {
       river: "projects/spatiocoretech-01-506820/assets/Bhoti_koshi_Trishulii_River",
-      districts: "projects/spatiocoretech-01-506820/assets/Flood_Districts",
-      classification: "projects/spatiocoretech-01-506820/assets/Flood_LULC_Change_ML",
+      districts: "projects/spatiocoretech-01-506820/assets/NepalFlood",
     },
     dataSource: "real",
+    eventDate: "2026-08-26",
   };
 
-  // Optional Gini importance if present
   try {
     const giniRows = fcToRows(readJson(findFile("03_dashboard_feature_importance")));
     const labels = JSON.parse(
@@ -161,8 +223,9 @@ function merge() {
   console.log("✓ change_stats.json");
   console.log("✓ config.json");
   console.log(`  Study area: ${changeStats.summary.study_area_km2} km²`);
-  console.log(`  Changed:    ${changeStats.summary.changed_area_km2} km² (${changeStats.summary.changed_pct}%)`);
-  console.log(`  Accuracy:   ${(changeStats.summary.model_accuracy * 100).toFixed(1)}%`);
+  console.log(`  Newly inundated: ${kpi.newly_inundated_km2} km²`);
+  console.log(`  LULC changed: ${kpi.total_lulc_change_km2} km²`);
+  console.log(`  Hold-out accuracy: ${(changeStats.summary.model_accuracy * 100).toFixed(1)}%`);
   console.log("\nNext: python scripts/run_lime_xai.py");
 }
 

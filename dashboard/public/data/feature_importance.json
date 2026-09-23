@@ -1,12 +1,7 @@
 [
-  { "feature": "dPers_S2_NDWI", "importance_pct": 18.4, "label": "S2 NDWI Δ (persist)" },
-  { "feature": "dPers_S2_NDVI", "importance_pct": 16.2, "label": "S2 NDVI Δ (persist)" },
-  { "feature": "dImm_S2_NDWI", "importance_pct": 12.8, "label": "S2 NDWI Δ (immediate)" },
-  { "feature": "dPers_L9_NDWI", "importance_pct": 11.5, "label": "L9 NDWI Δ (persist)" },
-  { "feature": "dPers_S2_BSI", "importance_pct": 9.7, "label": "S2 BSI Δ (persist)" },
-  { "feature": "dImm_L9_NDVI", "importance_pct": 8.3, "label": "L9 NDVI Δ (immediate)" },
-  { "feature": "S2_NDWI", "importance_pct": 7.1, "label": "S2 NDWI (post)" },
-  { "feature": "L9_NBR", "importance_pct": 6.4, "label": "L9 NBR (post)" },
-  { "feature": "dPers_L9_NBR", "importance_pct": 5.2, "label": "L9 NBR Δ (persist)" },
-  { "feature": "S2_NDBI", "importance_pct": 4.4, "label": "S2 NDBI (post)" }
+  { "feature": "Delta_MNDWI", "importance_pct": 32.1, "label": "MNDWI Δ" },
+  { "feature": "Delta_NDWI", "importance_pct": 25.3, "label": "NDWI Δ" },
+  { "feature": "Delta_NDVI", "importance_pct": 16.1, "label": "NDVI Δ" },
+  { "feature": "Delta_BSI", "importance_pct": 13.8, "label": "BSI Δ (bare soil)" },
+  { "feature": "Delta_NDBI", "importance_pct": 12.6, "label": "NDBI Δ" }
 ]
