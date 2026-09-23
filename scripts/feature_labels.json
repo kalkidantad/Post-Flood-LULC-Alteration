@@ -10,5 +10,6 @@
   "Delta_NDVI": "NDVI Δ",
   "NDBI_PRE": "NDBI (pre-flood)",
   "NDBI_FLOOD": "NDBI (flood)",
-  "Delta_NDBI": "NDBI Δ"
+  "Delta_NDBI": "NDBI Δ",
+  "Delta_BSI": "BSI Δ (bare soil)"
 }

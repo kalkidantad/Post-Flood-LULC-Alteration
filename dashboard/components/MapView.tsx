@@ -13,8 +13,10 @@ import type {
   DashboardConfig,
   Hotspot,
   LimeLocalExplanation,
+  MapLayerGroup,
 } from "@/lib/types";
 import LayerControl from "./LayerControl";
+import MapLegend from "./MapLegend";
 
 interface MapViewProps {
   config: DashboardConfig;
@@ -65,6 +67,15 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
   );
   const [showHotspots, setShowHotspots] = useState(true);
   const [showLimeSamples, setShowLimeSamples] = useState(true);
+  const [mapLayerGroups, setMapLayerGroups] = useState<Record<MapLayerGroup, boolean>>({
+    base_pre: false,
+    base_flood: false,
+    flood_indices: true,
+    binary_flood: true,
+    lulc: true,
+    transformation: true,
+    hotspots: true,
+  });
 
   const center = useMemo(
     (): [number, number] => [
@@ -83,9 +94,18 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
     setVisibleLayers((prev) => ({ ...prev, [classId]: !prev[classId] }));
   };
 
+  const toggleMapGroup = (group: MapLayerGroup) => {
+    setMapLayerGroups((prev) => ({ ...prev, [group]: !prev[group] }));
+    if (group === "hotspots") {
+      setShowHotspots((v) => !v);
+    }
+  };
+
   const filteredHotspots = stats.hotspots.filter(
     (h) => h.class_id === undefined || visibleLayers[h.class_id] !== false
   );
+
+  const showHotspotsOnMap = showHotspots && mapLayerGroups.hotspots;
 
   return (
     <div className="relative h-full min-h-[420px] w-full overflow-hidden rounded-lg border border-surface-border">
@@ -111,7 +131,7 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
         )}
 
         {isReal &&
-          showHotspots &&
+          showHotspotsOnMap &&
           filteredHotspots.map((spot, i) => (
             <CircleMarker
               key={`${spot.name}-${i}`}
@@ -195,7 +215,7 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
             )}
 
         {!isReal &&
-          showHotspots &&
+          showHotspotsOnMap &&
           stats.hotspots.map((spot) => (
             <CircleMarker
               key={spot.name}
@@ -222,12 +242,19 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
         visibleLayers={visibleLayers}
         onToggle={toggleLayer}
         showHotspots={showHotspots}
-        onToggleHotspots={() => setShowHotspots((v) => !v)}
+        onToggleHotspots={() => {
+          setShowHotspots((v) => !v);
+          setMapLayerGroups((prev) => ({ ...prev, hotspots: !prev.hotspots }));
+        }}
         showLimeSamples={limeSamples.length > 0 ? showLimeSamples : undefined}
         onToggleLimeSamples={
           limeSamples.length > 0 ? () => setShowLimeSamples((v) => !v) : undefined
         }
+        mapLayerGroups={mapLayerGroups}
+        onToggleMapGroup={toggleMapGroup}
       />
+
+      {mapLayerGroups.lulc && <MapLegend />}
 
       {!isReal && (
         <div className="absolute right-3 top-3 z-[1000] rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-300">
