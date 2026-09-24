@@ -146,9 +146,19 @@ function merge() {
           ? round(((kpi.total_lulc_change_km2 || changedAreaKm2) / studyAreaKm2) * 100, 1)
           : 0,
       persistent_change_km2: kpi.total_lulc_change_km2 || changedAreaKm2,
-      model_accuracy: round(Number(metrics.validation_accuracy), 3),
-      kappa: round(Number(metrics.kappa), 3),
-      oob_error: round(Number(metrics.oob_error), 3),
+      model_accuracy: round(Number(metrics.validation_accuracy || metrics.ml_agreement || 0), 3),
+      kappa: round(Number(metrics.kappa || 0), 3),
+      oob_error: round(Number(metrics.oob_error || 0), 3),
+      ml_agreement_pct: metrics.ml_agreement_pct
+        ? round(Number(metrics.ml_agreement_pct), 1)
+        : metrics.overlap_km2 && metrics.baseline_km2
+          ? round(
+              (Number(metrics.overlap_km2) /
+                Math.max(Number(metrics.baseline_km2), Number(metrics.ml_km2), 1)) *
+                100,
+              1
+            )
+          : undefined,
     },
     kpi,
     transitions: transitions.length > 0 ? transitions : buildTransitions(kpi),
@@ -188,15 +198,29 @@ function merge() {
     mapCenter: [Number(mapCenter.lat), Number(mapCenter.lng)],
     mapZoom: Number(mapCenter.zoom || 11),
     dataSources: ["Landsat 9", "JRC Global Surface Water"],
-    mlModel: `Random Forest (${metrics.rf_trees} trees, spatial hold-out)`,
-    xaiMethod: "LIME + rule-based inundation logic",
+    mlModel: metrics.ml_method || `Unsupervised K-means (k=${metrics.k_clusters || 5})`,
+    xaiMethod: "Rule-based pixel inspector + LIME (optional)",
     eeAssets: {
       river: "projects/spatiocoretech-01-506820/assets/Bhoti_koshi_Trishulii_River",
       districts: "projects/spatiocoretech-01-506820/assets/NepalFlood",
     },
     dataSource: "real",
     eventDate: "2026-08-26",
+    mapTileLayers: {},
   };
+
+  try {
+    const layerRows = fcToRows(readJson(findFile("10_dashboard_map_layers", true)));
+    if (layerRows[0]) {
+      config.mapTileLayers = Object.fromEntries(
+        Object.entries(layerRows[0]).filter(
+          ([, url]) => typeof url === "string" && url.startsWith("http")
+        )
+      );
+    }
+  } catch {
+    // optional tile manifest
+  }
 
   try {
     const giniRows = fcToRows(readJson(findFile("03_dashboard_feature_importance")));
@@ -225,7 +249,11 @@ function merge() {
   console.log(`  Study area: ${changeStats.summary.study_area_km2} km²`);
   console.log(`  Newly inundated: ${kpi.newly_inundated_km2} km²`);
   console.log(`  LULC changed: ${kpi.total_lulc_change_km2} km²`);
-  console.log(`  Hold-out accuracy: ${(changeStats.summary.model_accuracy * 100).toFixed(1)}%`);
+  if (changeStats.summary.ml_agreement_pct) {
+    console.log(`  ML agreement: ${changeStats.summary.ml_agreement_pct}%`);
+  } else {
+    console.log(`  Model metric: ${(changeStats.summary.model_accuracy * 100).toFixed(1)}%`);
+  }
   console.log("\nNext: python scripts/run_lime_xai.py");
 }
 

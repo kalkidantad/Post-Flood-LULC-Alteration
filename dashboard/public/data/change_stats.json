@@ -4,9 +4,10 @@
     "changed_area_km2": 18.4,
     "changed_pct": 14.7,
     "persistent_change_km2": 18.4,
-    "model_accuracy": 0.79,
-    "kappa": 0.71,
-    "oob_error": 0.18
+    "model_accuracy": 0.72,
+    "kappa": 0.0,
+    "oob_error": 0.0,
+    "ml_agreement_pct": 72.0
   },
   "kpi": {
     "newly_inundated_km2": 6.2,
@@ -28,11 +29,10 @@
     { "pre": "Agriculture", "post": "Bare Soil", "emoji": "🟤", "area_km2": 2.4 }
   ],
   "classes": [
-    { "id": 0, "name": "No Change", "color": "#2d3436", "area_km2": 106.4, "pct": 85.3 },
-    { "id": 1, "name": "Newly Inundated", "color": "#0984e3", "area_km2": 6.2, "pct": 5.0 },
-    { "id": 2, "name": "Vegetation Loss", "color": "#00b894", "area_km2": 4.6, "pct": 3.7 },
-    { "id": 3, "name": "Built-up Alteration", "color": "#e17055", "area_km2": 1.8, "pct": 1.4 },
-    { "id": 4, "name": "Bare Soil Exposure", "color": "#fdcb6e", "area_km2": 5.6, "pct": 4.5 }
+    { "id": 0, "name": "No Change", "color": "#CCCCCC", "area_km2": 106.4, "pct": 85.3 },
+    { "id": 1, "name": "Newly Inundated", "color": "#0000FF", "area_km2": 6.2, "pct": 5.0 },
+    { "id": 2, "name": "Vegetation Loss", "color": "#00AA00", "area_km2": 4.6, "pct": 3.7 },
+    { "id": 3, "name": "Built-up Alteration", "color": "#FF0000", "area_km2": 1.8, "pct": 1.4 }
   ],
   "periods": {
     "pre": { "start": "2026-07-06", "end": "2026-08-06", "label": "Pre-event baseline" },
@@ -42,6 +42,6 @@
   "hotspots": [
     { "name": "Newly Inundated", "lat": 27.92, "lng": 85.88, "severity": "high", "class_id": 1, "hotspot_score": 8.2 },
     { "name": "Vegetation Loss", "lat": 27.86, "lng": 85.79, "severity": "medium", "class_id": 2, "hotspot_score": 4.5 },
-    { "name": "Bare Soil Exposure", "lat": 27.81, "lng": 85.71, "severity": "high", "class_id": 4, "hotspot_score": 7.1 }
+    { "name": "Built-up Alteration", "lat": 27.81, "lng": 85.71, "severity": "high", "class_id": 3, "hotspot_score": 7.1 }
   ]
 }
