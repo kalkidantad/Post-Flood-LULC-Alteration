@@ -8,12 +8,20 @@ import {
   TileLayer,
   useMap,
 } from "react-leaflet";
+import {
+  activeLegendType,
+  defaultLayerVisibility,
+  MAP_LAYER_DEFS,
+  resolveTileUrl,
+  visibleClassIds,
+} from "@/lib/mapLayers";
+import { transformationColor } from "@/lib/layerPalette";
 import type {
   ChangeStats,
   DashboardConfig,
   Hotspot,
   LimeLocalExplanation,
-  MapLayerGroup,
+  MapLayerId,
 } from "@/lib/types";
 import LayerControl from "./LayerControl";
 import MapLegend from "./MapLegend";
@@ -24,7 +32,6 @@ interface MapViewProps {
   limeSamples?: LimeLocalExplanation[];
 }
 
-/** Fix map size after dynamic mount — avoids Leaflet pane errors */
 function MapResizeFix() {
   const map = useMap();
   useEffect(() => {
@@ -32,7 +39,7 @@ function MapResizeFix() {
       try {
         map.invalidateSize();
       } catch {
-        // map unmounted
+        // unmounted
       }
     }, 0);
     return () => window.clearTimeout(timer);
@@ -43,16 +50,12 @@ function MapResizeFix() {
 function severityColor(severity: Hotspot["severity"]) {
   switch (severity) {
     case "high":
-      return "#e17055";
+      return "#FF0000";
     case "medium":
-      return "#fdcb6e";
+      return "#FFA500";
     default:
-      return "#74b9ff";
+      return "#FFFF00";
   }
-}
-
-function classColor(classes: ChangeStats["classes"], classId?: number) {
-  return classes.find((c) => c.id === classId)?.color ?? "#636e72";
 }
 
 function safeCoord(value: number | undefined, fallback: number) {
@@ -62,53 +65,55 @@ function safeCoord(value: number | undefined, fallback: number) {
 export default function MapView({ config, stats, limeSamples = [] }: MapViewProps) {
   const isReal = config.dataSource === "real";
 
-  const [visibleLayers, setVisibleLayers] = useState<Record<number, boolean>>(
-    () => Object.fromEntries(stats.classes.map((c) => [c.id, true]))
+  const [classVisible, setClassVisible] = useState<Record<number, boolean>>(() =>
+    Object.fromEntries(stats.classes.map((c) => [c.id, true]))
   );
-  const [showHotspots, setShowHotspots] = useState(true);
+  const [layerVisible, setLayerVisible] =
+    useState<Record<MapLayerId, boolean>>(defaultLayerVisibility);
   const [showLimeSamples, setShowLimeSamples] = useState(true);
-  const [mapLayerGroups, setMapLayerGroups] = useState<Record<MapLayerGroup, boolean>>({
-    base_pre: false,
-    base_flood: false,
-    flood_indices: true,
-    binary_flood: true,
-    lulc: true,
-    transformation: true,
-    hotspots: true,
-  });
 
   const center = useMemo(
     (): [number, number] => [
-      safeCoord(config.mapCenter?.[0], 27.85),
-      safeCoord(config.mapCenter?.[1], 85.75),
+      safeCoord(config.mapCenter?.[0], 27.88),
+      safeCoord(config.mapCenter?.[1], 85.82),
     ],
     [config.mapCenter]
   );
 
-  const zoom = safeCoord(config.mapZoom, 10);
+  const zoom = safeCoord(config.mapZoom, 11);
   const mapKey = `${center[0].toFixed(3)}-${center[1].toFixed(3)}-${zoom}`;
 
-  const eeTileUrl = process.env.NEXT_PUBLIC_EE_TILE_URL;
+  const activeTileLayers = useMemo(
+    () =>
+      MAP_LAYER_DEFS.filter((layer) => layerVisible[layer.id]).flatMap((layer) => {
+        const url = resolveTileUrl(layer, config.mapTileLayers);
+        return url ? [{ ...layer, url }] : [];
+      }),
+    [layerVisible, config.mapTileLayers]
+  );
 
-  const toggleLayer = (classId: number) => {
-    setVisibleLayers((prev) => ({ ...prev, [classId]: !prev[classId] }));
+  const shownClassIds = visibleClassIds(layerVisible, classVisible);
+  const legendType = activeLegendType(layerVisible);
+  const showHotspots = layerVisible.hotspots;
+  const showDemoOverlay =
+    !isReal && shownClassIds.size > 0 && activeTileLayers.length === 0;
+
+  const toggleClass = (classId: number) => {
+    setClassVisible((prev) => ({ ...prev, [classId]: !prev[classId] }));
   };
 
-  const toggleMapGroup = (group: MapLayerGroup) => {
-    setMapLayerGroups((prev) => ({ ...prev, [group]: !prev[group] }));
-    if (group === "hotspots") {
-      setShowHotspots((v) => !v);
-    }
+  const toggleLayer = (layerId: MapLayerId) => {
+    setLayerVisible((prev) => ({ ...prev, [layerId]: !prev[layerId] }));
   };
 
   const filteredHotspots = stats.hotspots.filter(
-    (h) => h.class_id === undefined || visibleLayers[h.class_id] !== false
+    (h) =>
+      showHotspots &&
+      (h.class_id === undefined || classVisible[h.class_id] !== false)
   );
 
-  const showHotspotsOnMap = showHotspots && mapLayerGroups.hotspots;
-
   return (
-    <div className="relative h-full min-h-[420px] w-full overflow-hidden rounded-lg border border-surface-border">
+    <div className="relative h-full min-h-[480px] w-full overflow-hidden rounded-lg border border-surface-border">
       <MapContainer
         key={mapKey}
         center={center}
@@ -117,30 +122,36 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
         className="h-full w-full"
       >
         <MapResizeFix />
+
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &middot; Esri'
+          url={
+            layerVisible.base_flood && !layerVisible.base_pre
+              ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          }
         />
 
-        {eeTileUrl && (
+        {activeTileLayers.map((layer) => (
           <TileLayer
+            key={layer.id}
+            url={layer.url}
+            opacity={layer.opacity}
             attribution="Google Earth Engine"
-            url={eeTileUrl}
-            opacity={0.65}
           />
-        )}
+        ))}
 
         {isReal &&
-          showHotspotsOnMap &&
+          showHotspots &&
           filteredHotspots.map((spot, i) => (
             <CircleMarker
               key={`${spot.name}-${i}`}
               center={[spot.lat, spot.lng]}
-              radius={10 + (spot.hotspot_score ?? 0)}
+              radius={8 + Math.min(spot.hotspot_score ?? 0, 12)}
               pathOptions={{
                 color: severityColor(spot.severity),
-                fillColor: classColor(stats.classes, spot.class_id),
-                fillOpacity: 0.45,
+                fillColor: transformationColor(spot.class_id ?? 1),
+                fillOpacity: 0.5,
                 weight: 2,
               }}
             >
@@ -175,38 +186,37 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
                 <strong>LIME sample</strong>
                 <br />
                 {s.class_name}
-                <br />
-                {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
               </Popup>
             </CircleMarker>
           ))}
 
-        {!isReal &&
+        {showDemoOverlay &&
           stats.classes
-            .filter((c) => c.id !== 0 && visibleLayers[c.id])
+            .filter((c) => c.id !== 0 && shownClassIds.has(c.id))
             .flatMap((cls, classIdx) =>
-              Array.from({ length: Math.max(2, Math.round(cls.area_km2 / 3)) }).map(
+              Array.from({ length: Math.max(2, Math.round(cls.area_km2 / 2.5)) }).map(
                 (_, i) => {
                   const lat =
-                    config.mapCenter[0] + (classIdx - 2) * 0.06 + (i % 3) * 0.02;
+                    config.mapCenter[0] + (classIdx - 2) * 0.055 + (i % 3) * 0.018;
                   const lng =
-                    config.mapCenter[1] + (i % 4) * 0.04 - 0.06 + classIdx * 0.01;
+                    config.mapCenter[1] + (i % 4) * 0.035 - 0.05 + classIdx * 0.012;
+                  const color = cls.color || transformationColor(cls.id);
                   return (
                     <CircleMarker
                       key={`${cls.id}-${i}`}
                       center={[lat, lng]}
-                      radius={6 + (cls.id % 3) * 2}
+                      radius={7 + (cls.id % 3)}
                       pathOptions={{
-                        color: cls.color,
-                        fillColor: cls.color,
-                        fillOpacity: 0.55,
+                        color,
+                        fillColor: color,
+                        fillOpacity: 0.6,
                         weight: 1,
                       }}
                     >
                       <Popup>
                         <strong>{cls.name}</strong>
                         <br />
-                        ~{cls.area_km2} km² (sample data)
+                        ~{cls.area_km2} km²
                       </Popup>
                     </CircleMarker>
                   );
@@ -214,51 +224,44 @@ export default function MapView({ config, stats, limeSamples = [] }: MapViewProp
               )
             )}
 
-        {!isReal &&
-          showHotspotsOnMap &&
-          stats.hotspots.map((spot) => (
-            <CircleMarker
-              key={spot.name}
-              center={[spot.lat, spot.lng]}
-              radius={14}
-              pathOptions={{
-                color: severityColor(spot.severity),
-                fillColor: severityColor(spot.severity),
-                fillOpacity: 0.25,
-                weight: 2,
-              }}
-            >
-              <Popup>
-                <strong>{spot.name}</strong>
-                <br />
-                Severity: {spot.severity}
-              </Popup>
-            </CircleMarker>
-          ))}
+        {!isReal && showHotspots && filteredHotspots.map((spot) => (
+          <CircleMarker
+            key={spot.name}
+            center={[spot.lat, spot.lng]}
+            radius={12}
+            pathOptions={{
+              color: severityColor(spot.severity),
+              fillColor: transformationColor(spot.class_id ?? 1),
+              fillOpacity: 0.35,
+              weight: 2,
+            }}
+          >
+            <Popup>
+              <strong>{spot.name}</strong>
+              <br />
+              Severity: {spot.severity}
+            </Popup>
+          </CircleMarker>
+        ))}
       </MapContainer>
 
       <LayerControl
         classes={stats.classes}
-        visibleLayers={visibleLayers}
-        onToggle={toggleLayer}
-        showHotspots={showHotspots}
-        onToggleHotspots={() => {
-          setShowHotspots((v) => !v);
-          setMapLayerGroups((prev) => ({ ...prev, hotspots: !prev.hotspots }));
-        }}
+        visibleLayers={classVisible}
+        onToggleClass={toggleClass}
+        layerVisible={layerVisible}
+        onToggleLayer={toggleLayer}
         showLimeSamples={limeSamples.length > 0 ? showLimeSamples : undefined}
         onToggleLimeSamples={
           limeSamples.length > 0 ? () => setShowLimeSamples((v) => !v) : undefined
         }
-        mapLayerGroups={mapLayerGroups}
-        onToggleMapGroup={toggleMapGroup}
       />
 
-      {mapLayerGroups.lulc && <MapLegend />}
+      <MapLegend legendType={legendType} />
 
-      {!isReal && (
+      {!isReal && activeTileLayers.length === 0 && (
         <div className="absolute right-3 top-3 z-[1000] rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-300">
-          Demo map — replace with real GEE exports
+          Demo overlay — set NEXT_PUBLIC_EE_TILE_* for live GEE layers
         </div>
       )}
     </div>

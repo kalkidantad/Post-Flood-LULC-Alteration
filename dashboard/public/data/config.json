@@ -5,12 +5,13 @@
   "mapCenter": [27.88, 85.82],
   "mapZoom": 11,
   "dataSources": ["Landsat 9", "JRC Global Surface Water"],
-  "mlModel": "Random Forest (500 trees, spatial hold-out)",
-  "xaiMethod": "LIME + rule-based inundation logic",
+  "mlModel": "Unsupervised K-means (k=5, delta indices only)",
+  "xaiMethod": "Rule-based pixel inspector + LIME (optional)",
   "dataSource": "sample",
   "eventDate": "2026-08-26",
   "eeAssets": {
     "river": "projects/spatiocoretech-01-506820/assets/Bhoti_koshi_Trishulii_River",
     "districts": "projects/spatiocoretech-01-506820/assets/NepalFlood"
-  }
+  },
+  "mapTileLayers": {}
 }

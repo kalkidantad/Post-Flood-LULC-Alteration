@@ -1,40 +1,37 @@
 # TerraTrace Earth Engine Scripts
 
-## Primary script (use this)
+## Primary script
 
-**`terratrace_ml_export.js`** — single paste-ready file combining:
+**`terratrace_ml_export.js`** — synced with team **ML.js** on Google Git (Hackathon repo), plus:
 
-- Hackathon_Final analysis (LULC, transitions, bare soil, flood risk)
-- All critical ML fixes (see below)
-- 9 dashboard export tasks
+- K-means speed tuning (`CLUSTER_TRAIN_SCALE=60`, `2500` pixels, `tileScale=2`)
+- Dashboard exports Tasks **01–10** (Next.js app — no `ui.*` EE App block)
+- GEE-correct palettes: LULC `#0000FF/#008000/#FF0000/#FFD700`, transformation `#0000FF/#00AA00/#FF0000`
 
-### How to run
+### Run in GEE
 
-1. Open [Earth Engine Code Editor](https://code.earthengine.google.com/)
-2. Paste entire `terratrace_ml_export.js` → **Run**
-3. **Tasks** tab → run exports `01` through `09`
-4. Share Drive folder → download to `data/raw/`
-5. `node scripts/merge_gee_exports.mjs`
-6. `python scripts/run_lime_xai.py`
-7. `cd dashboard && npm run dev`
+1. Paste `terratrace_ml_export.js` → **Run**
+2. Tasks tab → run **01–10**
+3. Share Drive exports → `data/raw/`
+4. `node scripts/merge_gee_exports.mjs`
+5. Optional: `python scripts/run_lime_xai.py`
+6. `cd dashboard && npm run dev`
 
-## Critical fixes applied
+### Live map layers in Next.js
 
-| Issue | Fix |
-|-------|-----|
-| Circular ML logic | Labels from independent transition layers; spatial block hold-out validation |
-| Class imbalance | 600 stratified samples per class (5 classes) |
-| Feature redundancy | Delta-only features (5 bands), normalized [0,1] |
-| Rigid LULC thresholds | AOI percentile-based adaptive thresholds |
-| Permanent water | JRC ≥50% included in LULC water; excluded from new inundation |
-| Small sample size | 3,000 total training points (600×5) |
-| Data quality | Cloud counts, valid pixel fraction, threshold prints |
-| Inflated validation | Spatial hold-out (block 0 train / block 1 validate) |
-| RF hyperparameters | 500 trees, varsPerSplit=2 |
-| Hotspot kernel | 5px square convolution |
-| Area units | Consistent `EXPORT_SCALE = 30` everywhere |
+After running the script, publish key layers in GEE and paste tile URLs into `dashboard/.env.local`:
 
-## Legacy / alternate files
+```bash
+NEXT_PUBLIC_EE_TILE_TRANSFORMATION=https://earthengine.googleapis.com/...
+NEXT_PUBLIC_EE_TILE_BINARY_FLOOD=...
+```
 
-- **`ML_fixed.js`** — ML + exports only; paste after team `Hackathon_Final` if you prefer two-part workflow
-- **`Hackathon_Final_patches.js`** — 3 line patches for team baseline before appending `ML_fixed.js`
+Or fill values from export **10_dashboard_map_layers** after publishing assets.
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `terratrace_ml_export.js` | Full analysis + K-means + exports (use this) |
+| `ML_fixed.js` | Legacy RF hold-out module (superseded by K-means) |
+| `Hackathon_Final_patches.js` | Patches for old two-file workflow |

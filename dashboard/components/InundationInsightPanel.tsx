@@ -43,7 +43,7 @@ export default function InundationInsightPanel({ lime }: InundationInsightPanelP
 
       {topDelta.length > 0 && (
         <div className="mt-4 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-3">
-          <p className="text-xs font-medium text-purple-300">LIME confirms (ML)</p>
+          <p className="text-xs font-medium text-purple-300">LIME / K-means delta features</p>
           <ul className="mt-2 space-y-1 text-xs text-gray-300">
             {topDelta.map((f) => (
               <li key={f.feature}>

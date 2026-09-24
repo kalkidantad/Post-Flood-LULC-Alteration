@@ -8,6 +8,7 @@ interface StatsPanelProps {
 export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
   const { summary, classes } = stats;
   const changeClasses = classes.filter((c) => c.id !== 0);
+  const isKmeans = summary.kappa === 0 && summary.oob_error === 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -23,12 +24,16 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
             highlight
           />
           <StatCard
-            label="Persistent change"
-            value={`${summary.persistent_change_km2} km²`}
+            label={isKmeans ? "ML agreement" : "Model accuracy"}
+            value={
+              isKmeans && summary.ml_agreement_pct
+                ? `${summary.ml_agreement_pct.toFixed(0)}%`
+                : `${(summary.model_accuracy * 100).toFixed(0)}%`
+            }
           />
           <StatCard
-            label="Model accuracy"
-            value={`${(summary.model_accuracy * 100).toFixed(0)}%`}
+            label="Change share"
+            value={`${summary.changed_pct}%`}
           />
         </div>
       </section>
@@ -45,7 +50,7 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
             >
               <span className="flex items-center gap-2 text-sm">
                 <span
-                  className="inline-block h-3 w-3 rounded-sm"
+                  className="inline-block h-3 w-3 rounded-sm border border-white/10"
                   style={{ backgroundColor: cls.color }}
                 />
                 {cls.name}
@@ -64,16 +69,24 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
           Model confidence
         </h2>
         <div className="rounded-lg border border-surface-border bg-surface px-3 py-3 text-sm">
-          <div className="flex justify-between py-1">
-            <span className="text-gray-400">Kappa</span>
-            <span>{summary.kappa.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between py-1">
-            <span className="text-gray-400">OOB error</span>
-            <span>{(summary.oob_error * 100).toFixed(1)}%</span>
-          </div>
+          {isKmeans ? (
+            <p className="text-xs text-gray-400">
+              K-means is unsupervised — agreement with rule-based map is the validation check.
+            </p>
+          ) : (
+            <>
+              <div className="flex justify-between py-1">
+                <span className="text-gray-400">Kappa</span>
+                <span>{summary.kappa.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-gray-400">OOB error</span>
+                <span>{(summary.oob_error * 100).toFixed(1)}%</span>
+              </div>
+            </>
+          )}
           {limeAccuracy !== undefined && (
-            <div className="flex justify-between py-1">
+            <div className="mt-2 flex justify-between border-t border-surface-border pt-2">
               <span className="text-gray-400">LIME model acc.</span>
               <span>{(limeAccuracy * 100).toFixed(1)}%</span>
             </div>

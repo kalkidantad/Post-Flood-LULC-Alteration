@@ -56,6 +56,8 @@ export interface ChangeStats {
     model_accuracy: number;
     kappa: number;
     oob_error: number;
+    /** Rule-based vs K-means overlap % (K-means has no ground-truth accuracy) */
+    ml_agreement_pct?: number;
   };
   kpi: TerraTraceKPI;
   transitions: LULCTransition[];
@@ -80,7 +82,30 @@ export interface DashboardConfig {
   eeAssets: Record<string, string>;
   dataSource?: "sample" | "real";
   eventDate?: string;
+  /** Optional GEE map tile URLs keyed by MapLayerId (from merge or manual) */
+  mapTileLayers?: Partial<Record<MapLayerId, string>>;
 }
+
+export type MapLayerId =
+  | "base_pre"
+  | "base_flood"
+  | "mndwi_pre"
+  | "mndwi_flood"
+  | "delta_mndwi"
+  | "ndwi_pre"
+  | "ndwi_flood"
+  | "delta_ndwi"
+  | "binary_flood"
+  | "lulc_pre"
+  | "lulc_flood"
+  | "lulc_change"
+  | "transformation"
+  | "flood_risk"
+  | "flood_damage"
+  | "bare_soil"
+  | "ml_classification"
+  | "ml_agreement"
+  | "hotspots";
 
 export interface LimeFeatureWeight {
   feature: string;
@@ -107,14 +132,5 @@ export interface LimeExplanations {
   global: LimeFeatureWeight[];
   local: LimeLocalExplanation[];
 }
-
-export type MapLayerGroup =
-  | "base_pre"
-  | "base_flood"
-  | "flood_indices"
-  | "binary_flood"
-  | "lulc"
-  | "transformation"
-  | "hotspots";
 
 export type TimePeriod = "pre" | "post_immediate" | "post_persistence";
