@@ -9,9 +9,9 @@ const config: Config = {
     extend: {
       colors: {
         surface: {
-          DEFAULT: "#0f1419",
-          card: "#1a2332",
-          border: "#2d3a4f",
+          DEFAULT: "#000000",
+          card: "#000000",
+          border: "#1f1f1f",
         },
         accent: {
           DEFAULT: "#0984e3",

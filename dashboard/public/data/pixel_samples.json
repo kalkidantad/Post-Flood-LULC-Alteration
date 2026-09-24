@@ -1,0 +1,71 @@
+[
+  {
+    "lat": 27.92,
+    "lng": 85.88,
+    "mndwi_pre": 0.01,
+    "mndwi_flood": 0.31,
+    "ndwi_pre": 0.04,
+    "ndwi_flood": 0.25,
+    "lulc_pre": "Vegetation",
+    "lulc_flood": "Water",
+    "permanent_water": false,
+    "valid_pixel": true,
+    "classification": "NEW INUNDATION",
+    "classification_color": "#1E6FD9",
+    "ml_class": "Flooded",
+    "rules": [
+      { "ok": true, "text": "MNDWI 0.01 → 0.31 (increased)", "icon": "📈" },
+      { "ok": true, "text": "NDWI 0.04 → 0.25 (increased)", "icon": "💧" },
+      { "ok": true, "text": "Pre-event: Vegetation", "icon": "🌿" },
+      { "ok": true, "text": "Flood-event: Water", "icon": "🔵" },
+      { "ok": true, "text": "Not permanent water (JRC < 50%)", "icon": "🗺️" },
+      { "ok": true, "text": "Valid pixel (QA mask passed)", "icon": "❄️" }
+    ]
+  },
+  {
+    "lat": 27.86,
+    "lng": 85.79,
+    "mndwi_pre": -0.02,
+    "mndwi_flood": 0.03,
+    "ndwi_pre": 0.15,
+    "ndwi_flood": 0.09,
+    "lulc_pre": "Vegetation",
+    "lulc_flood": "Agriculture",
+    "permanent_water": false,
+    "valid_pixel": true,
+    "classification": "VEGETATION LOSS",
+    "classification_color": "#00AA00",
+    "ml_class": "Vegetation loss",
+    "rules": [
+      { "ok": false, "text": "MNDWI not strongly increased", "icon": "📈" },
+      { "ok": false, "text": "NDWI decreased", "icon": "💧" },
+      { "ok": true, "text": "Pre-event: Vegetation", "icon": "🌿" },
+      { "ok": false, "text": "Flood-event: not water", "icon": "🔵" },
+      { "ok": true, "text": "Not permanent water", "icon": "🗺️" },
+      { "ok": true, "text": "Valid pixel", "icon": "❄️" }
+    ]
+  },
+  {
+    "lat": 27.81,
+    "lng": 85.71,
+    "mndwi_pre": 0.08,
+    "mndwi_flood": 0.22,
+    "ndwi_pre": 0.06,
+    "ndwi_flood": 0.18,
+    "lulc_pre": "Built-up",
+    "lulc_flood": "Water",
+    "permanent_water": false,
+    "valid_pixel": true,
+    "classification": "NEW INUNDATION",
+    "classification_color": "#1E6FD9",
+    "ml_class": "Flooded",
+    "rules": [
+      { "ok": true, "text": "MNDWI 0.08 → 0.22 (increased)", "icon": "📈" },
+      { "ok": true, "text": "NDWI 0.06 → 0.18 (increased)", "icon": "💧" },
+      { "ok": true, "text": "Pre-event: Built-up", "icon": "🏢" },
+      { "ok": true, "text": "Flood-event: Water", "icon": "🔵" },
+      { "ok": true, "text": "Not permanent water", "icon": "🗺️" },
+      { "ok": true, "text": "Valid pixel", "icon": "❄️" }
+    ]
+  }
+]

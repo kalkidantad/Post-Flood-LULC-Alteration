@@ -13,7 +13,7 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
   return (
     <div className="flex flex-col gap-4">
       <section>
-        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white">
           Overview
         </h2>
         <div className="grid grid-cols-2 gap-3">
@@ -39,25 +39,25 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white">
           Change by class
         </h2>
         <ul className="space-y-2">
           {changeClasses.map((cls) => (
             <li
               key={cls.id}
-              className="flex items-center justify-between rounded-lg border border-surface-border bg-surface px-3 py-2"
+              className="card-inner flex items-center justify-between px-3 py-2"
             >
-              <span className="flex items-center gap-2 text-sm">
+              <span className="flex items-center gap-2 text-sm text-white">
                 <span
-                  className="inline-block h-3 w-3 rounded-sm border border-white/10"
+                  className="inline-block h-3 w-3 rounded-sm"
                   style={{ backgroundColor: cls.color }}
                 />
                 {cls.name}
               </span>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-white">
                 {cls.area_km2} km²{" "}
-                <span className="text-gray-500">({cls.pct}%)</span>
+                <span>({cls.pct}%)</span>
               </span>
             </li>
           ))}
@@ -65,29 +65,29 @@ export default function StatsPanel({ stats, limeAccuracy }: StatsPanelProps) {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-gray-400">
+        <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white">
           Model confidence
         </h2>
-        <div className="rounded-lg border border-surface-border bg-surface px-3 py-3 text-sm">
+        <div className="card-inner px-3 py-3 text-sm">
           {isKmeans ? (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-white">
               K-means is unsupervised — agreement with rule-based map is the validation check.
             </p>
           ) : (
             <>
-              <div className="flex justify-between py-1">
-                <span className="text-gray-400">Kappa</span>
+              <div className="flex justify-between py-1 text-white">
+                <span>Kappa</span>
                 <span>{summary.kappa.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-gray-400">OOB error</span>
+              <div className="flex justify-between py-1 text-white">
+                <span>OOB error</span>
                 <span>{(summary.oob_error * 100).toFixed(1)}%</span>
               </div>
             </>
           )}
           {limeAccuracy !== undefined && (
-            <div className="mt-2 flex justify-between border-t border-surface-border pt-2">
-              <span className="text-gray-400">LIME model acc.</span>
+            <div className="mt-2 flex justify-between pt-2 text-white">
+              <span>LIME model acc.</span>
               <span>{(limeAccuracy * 100).toFixed(1)}%</span>
             </div>
           )}
@@ -108,13 +108,11 @@ function StatCard({
 }) {
   return (
     <div
-      className={`rounded-lg border px-3 py-3 ${
-        highlight
-          ? "border-accent/40 bg-accent/10"
-          : "border-surface-border bg-surface"
+      className={`rounded-lg px-3 py-3 ${
+        highlight ? "bg-accent/10" : "bg-black ring-1 ring-white/10"
       }`}
     >
-      <p className="text-xs text-gray-400">{label}</p>
+      <p className="text-xs text-white">{label}</p>
       <p className="mt-1 text-lg font-semibold text-white">{value}</p>
     </div>
   );

@@ -49,37 +49,44 @@ function ensureOutDir() {
   fs.mkdirSync(OUT, { recursive: true });
 }
 
-function buildTransitions(metrics) {
+function buildTransitions(metrics, studyAreaKm2 = 0) {
+  const pct = (km2) =>
+    studyAreaKm2 > 0 ? round((Number(km2) / studyAreaKm2) * 100, 2) : 0;
   return [
     {
       pre: "Agriculture",
       post: "Water",
       emoji: "🌊",
       area_km2: round(Number(metrics.agri_to_water_km2 || 0), 2),
+      pct_aoi: pct(metrics.agri_to_water_km2),
     },
     {
       pre: "Vegetation",
       post: "Water",
       emoji: "🌊",
       area_km2: round(Number(metrics.veg_to_water_km2 || 0), 2),
+      pct_aoi: pct(metrics.veg_to_water_km2),
     },
     {
       pre: "Built-up",
       post: "Water",
       emoji: "🌊",
       area_km2: round(Number(metrics.built_to_water_km2 || metrics.builtup_to_water_km2 || 0), 2),
+      pct_aoi: pct(metrics.built_to_water_km2 || metrics.builtup_to_water_km2),
     },
     {
       pre: "Vegetation",
       post: "Bare Soil",
       emoji: "🟤",
       area_km2: round(Number(metrics.veg_to_bare_soil_km2 || 0), 2),
+      pct_aoi: pct(metrics.veg_to_bare_soil_km2),
     },
     {
       pre: "Agriculture",
       post: "Bare Soil",
       emoji: "🟤",
       area_km2: round(Number(metrics.agri_to_bare_soil_km2 || 0), 2),
+      pct_aoi: pct(metrics.agri_to_bare_soil_km2),
     },
   ].filter((t) => t.area_km2 > 0);
 }
@@ -135,7 +142,38 @@ function merge() {
     2
   );
 
-  const transitions = buildTransitions({ ...metrics, ...kpiRaw });
+  const transitions = buildTransitions({ ...metrics, ...kpiRaw }, studyAreaKm2);
+
+  const mlComparison = {
+    rule_based_km2: round(Number(metrics.baseline_km2 || kpi.total_lulc_change_km2), 2),
+    ml_km2: round(Number(metrics.ml_km2 || 0), 2),
+    overlap_km2: round(Number(metrics.overlap_km2 || 0), 2),
+    agreement_pct: round(
+      Number(
+        metrics.ml_agreement_pct ||
+          (metrics.overlap_km2 && metrics.baseline_km2
+            ? (Number(metrics.overlap_km2) /
+                Math.max(Number(metrics.baseline_km2), Number(metrics.ml_km2), 1)) *
+              100
+            : 0)
+      ),
+      1
+    ),
+  };
+
+  const charts = {
+    transitions: transitions.map((t) => ({
+      label: `${t.pre.slice(0, 4)} → ${t.post}`,
+      km2: t.area_km2,
+      color: t.post.includes("Water") ? "#1E90FF" : "#8B4513",
+    })),
+    flood_risk_by_prior: [],
+    ml_comparison: [
+      { label: "Rule-based", km2: mlComparison.rule_based_km2, color: "#0984e3" },
+      { label: "ML (K-means)", km2: mlComparison.ml_km2, color: "#7B3FE4" },
+      { label: "Overlap", km2: mlComparison.overlap_km2, color: "#00AA00" },
+    ],
+  };
 
   const changeStats = {
     summary: {
@@ -161,7 +199,9 @@ function merge() {
           : undefined,
     },
     kpi,
-    transitions: transitions.length > 0 ? transitions : buildTransitions(kpi),
+    transitions: transitions.length > 0 ? transitions : buildTransitions(kpi, studyAreaKm2),
+    ml_comparison: mlComparison,
+    charts,
     classes,
     periods: {
       pre: {

@@ -14,22 +14,25 @@ import type { FeatureImportance } from "@/lib/types";
 interface XAIChartProps {
   data: FeatureImportance[];
   method: string;
+  hideHeader?: boolean;
 }
 
-export default function XAIChart({ data, method }: XAIChartProps) {
+export default function XAIChart({ data, method, hideHeader = false }: XAIChartProps) {
   const sorted = [...data].sort(
     (a, b) => b.importance_pct - a.importance_pct
   );
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-3">
-        <h2 className="text-sm font-medium uppercase tracking-wider text-gray-400">
-          Explainable AI
-        </h2>
-        <p className="mt-1 text-xs text-gray-500">{method}</p>
-      </div>
-      <div className="min-h-[280px] flex-1">
+      {!hideHeader && (
+        <div className="mb-3">
+          <h2 className="text-sm font-medium uppercase tracking-wider text-white">
+            Explainable AI
+          </h2>
+          <p className="mt-1 text-xs text-white">{method}</p>
+        </div>
+      )}
+      <div className={`${hideHeader ? "h-[320px]" : "min-h-[280px] flex-1"}`}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={sorted}
@@ -51,7 +54,7 @@ export default function XAIChart({ data, method }: XAIChartProps) {
             />
             <Tooltip
               contentStyle={{
-                background: "#1a2332",
+                background: "#000000",
                 border: "1px solid #2d3a4f",
                 borderRadius: 8,
                 fontSize: 12,
@@ -62,10 +65,9 @@ export default function XAIChart({ data, method }: XAIChartProps) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="mt-2 text-xs text-gray-500">
-        Higher bars indicate stronger influence on the Random Forest classifier
-        decision boundaries. Water and vegetation delta indices dominate flood
-        change signatures.
+      <p className="mt-2 text-xs text-white">
+        Higher bars indicate stronger delta-band signal in the study area. MNDWI and
+        NDWI changes dominate flood signatures in K-means clustering.
       </p>
     </div>
   );

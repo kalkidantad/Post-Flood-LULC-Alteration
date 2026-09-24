@@ -1,26 +1,39 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
-import Header from "./Header";
-import InundationInsightPanel from "./InundationInsightPanel";
+import { useCallback, useEffect, useState } from "react";
+import AppShell from "./AppShell";
+import HeroBanner from "./HeroBanner";
 import KPICards from "./KPICards";
-import LimeChart from "./LimeChart";
-import LULCTransformationPanel from "./LULCTransformationPanel";
-import StatsPanel from "./StatsPanel";
+import MapInsightsSection from "./MapInsightsSection";
 import TimeComparison from "./TimeComparison";
+import { defaultMlComparison } from "@/lib/chartDefaults";
+import { inspectPixel } from "@/lib/pixelInspect";
+import { layersForPeriod } from "@/lib/periodLayers";
 import type {
   ChangeStats,
   DashboardConfig,
   LimeExplanations,
+  MapLayerId,
+  MapViewMode,
+  PixelInspection,
   TimePeriod,
 } from "@/lib/types";
 
 const MapView = dynamic(() => import("./MapView"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[480px] items-center justify-center rounded-lg border border-surface-border bg-surface-card text-sm text-gray-400">
+    <div className="map-shell flex items-center justify-center text-sm text-white/60">
       Loading map…
+    </div>
+  ),
+});
+
+const SwipeMapView = dynamic(() => import("./SwipeMapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="map-shell flex items-center justify-center text-sm text-white/60">
+      Loading swipe compare…
     </div>
   ),
 });
@@ -29,6 +42,7 @@ interface DashboardClientProps {
   config: DashboardConfig;
   stats: ChangeStats;
   lime: LimeExplanations | null;
+  pixelSamples: PixelInspection[];
 }
 
 const DEFAULT_KPI = {
@@ -52,8 +66,46 @@ export default function DashboardClient({
   config,
   stats,
   lime,
+  pixelSamples,
 }: DashboardClientProps) {
   const [period, setPeriod] = useState<TimePeriod>("post_immediate");
+  const [mapMode, setMapMode] = useState<MapViewMode>("main");
+  const [layerVisible, setLayerVisible] = useState<Record<MapLayerId, boolean>>(
+    () => layersForPeriod("post_immediate")
+  );
+  const [inspection, setInspection] = useState<PixelInspection | null>(null);
+  const [inspectMarker, setInspectMarker] = useState<[number, number] | null>(null);
+  const [showLimeSamples, setShowLimeSamples] = useState(true);
+
+  useEffect(() => {
+    // #region agent log
+    fetch("http://127.0.0.1:7656/ingest/fa884f89-22ac-4292-bdf2-1e77989dda3a", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c4750a" },
+      body: JSON.stringify({
+        sessionId: "c4750a",
+        runId: "pre-fix",
+        hypothesisId: "C",
+        location: "DashboardClient.tsx:mount",
+        message: "Client hydrated — DashboardClient mounted",
+        data: { mapMode, period, dataSource: config.dataSource },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+  }, []);
+
+  useEffect(() => {
+    setLayerVisible(layersForPeriod(period));
+  }, [period]);
+
+  const handlePixelInspect = useCallback(
+    (lat: number, lng: number) => {
+      setInspectMarker([lat, lng]);
+      setInspection(inspectPixel(lat, lng, pixelSamples));
+    },
+    [pixelSamples]
+  );
 
   const kpi = stats.kpi ?? {
     ...DEFAULT_KPI,
@@ -63,63 +115,57 @@ export default function DashboardClient({
   };
 
   const transitions =
-    stats.transitions && stats.transitions.length > 0
-      ? stats.transitions
-      : DEFAULT_TRANSITIONS;
+    stats.transitions?.length > 0 ? stats.transitions : DEFAULT_TRANSITIONS;
+
+  const mlComparison = defaultMlComparison(stats);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header config={config} />
-
-      <main className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
-        <TimeComparison stats={stats} selected={period} onChange={setPeriod} />
+    <AppShell config={config}>
+        <HeroBanner config={config} />
 
         <KPICards kpi={kpi} />
 
-        <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-12">
-          <section className="xl:col-span-7">
+        <TimeComparison
+          stats={stats}
+          selected={period}
+          onChange={setPeriod}
+          mapMode={mapMode}
+          onMapModeChange={setMapMode}
+        />
+
+        <section className="map-shell w-full overflow-hidden rounded-3xl">
+          {mapMode === "swipe" ? (
+            <SwipeMapView
+              config={config}
+              stats={stats}
+              onPixelInspect={handlePixelInspect}
+              inspectMarker={inspectMarker}
+            />
+          ) : (
             <MapView
               config={config}
               stats={stats}
               limeSamples={lime?.local ?? []}
+              layerVisible={layerVisible}
+              onLayerVisibleChange={setLayerVisible}
+              onPixelInspect={handlePixelInspect}
+              inspectMarker={inspectMarker}
+              showLimeSamples={showLimeSamples}
+              onToggleLimeSamples={() => setShowLimeSamples((v) => !v)}
             />
-          </section>
-
-          <aside className="flex flex-col gap-4 xl:col-span-5">
-            <LULCTransformationPanel transitions={transitions} />
-            <InundationInsightPanel lime={lime} />
-            <div className="rounded-lg border border-surface-border bg-surface-card p-4">
-              <StatsPanel
-                stats={stats}
-                limeAccuracy={lime?.sklearn_validation_accuracy}
-              />
-            </div>
-          </aside>
-        </div>
-
-        <section className="rounded-lg border border-surface-border bg-surface-card p-4">
-          {lime ? (
-            <LimeChart
-              globalData={lime.global}
-              localSamples={lime.local}
-              method={lime.method}
-            />
-          ) : (
-            <div className="py-8 text-center text-sm text-gray-400">
-              <p className="font-medium text-gray-300">LIME explanations not loaded</p>
-              <p className="mt-2">
-                Export CSV from GEE → run{" "}
-                <code className="text-accent">python scripts/run_lime_xai.py</code>
-              </p>
-            </div>
           )}
         </section>
-      </main>
 
-      <footer className="border-t border-surface-border px-6 py-3 text-center text-xs text-gray-500">
-        <span className="font-semibold tracking-wide text-gray-400">TerraTrace</span>
-        {" · "}SPARK 4.0 Nepal EO Hackathon · Landsat 9 · RF spatial hold-out + LIME XAI
-      </footer>
-    </div>
+        <MapInsightsSection
+          transitions={transitions}
+          studyAreaKm2={kpi.study_area_km2}
+          totalChangeKm2={kpi.total_lulc_change_km2}
+          lime={lime}
+          inspection={inspection}
+          mlComparison={mlComparison}
+          stats={stats}
+          limeAccuracy={lime?.sklearn_validation_accuracy}
+        />
+    </AppShell>
   );
 }

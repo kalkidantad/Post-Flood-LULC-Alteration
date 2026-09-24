@@ -9,20 +9,126 @@
 }
 
 body {
-  @apply bg-surface text-gray-100 antialiased;
+  @apply bg-black text-white antialiased;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl bg-black text-white;
+  }
+
+  .card-inner {
+    @apply rounded-xl bg-black text-white;
+  }
+
+  .metric-card {
+    @apply rounded-3xl bg-black p-6 text-white;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .metric-card-header {
+    @apply mb-5 flex items-center justify-between gap-3;
+  }
+
+  .metric-card-title {
+    @apply text-base font-semibold text-white;
+  }
+
+  .metric-pill {
+    @apply shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80;
+  }
+
+  .metric-hero {
+    @apply text-3xl font-bold tracking-tight text-white md:text-4xl;
+  }
+
+  .metric-hero-label {
+    @apply mt-1 text-sm text-white/60;
+  }
+
+  .metric-list {
+    @apply divide-y divide-white/10;
+  }
+
+  .metric-row {
+    @apply flex items-center justify-between gap-4 py-3;
+  }
+
+  .metric-bar-track {
+    @apply h-2 w-full overflow-hidden rounded-full bg-white/10;
+  }
+
+  .metric-bar-fill {
+    background: var(--bar-color, #6366f1);
+    transition: width 0.4s ease;
+  }
+
+  .metric-stat-tile {
+    @apply rounded-2xl bg-black px-4 py-3 ring-1 ring-white/10;
+  }
+
+  .hero-banner {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 40%, rgba(99, 102, 241, 0.45), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 80% 30%, rgba(168, 85, 247, 0.4), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 50% 80%, rgba(9, 132, 227, 0.25), transparent 55%),
+      linear-gradient(160deg, #0a0a12 0%, #12101f 40%, #0f1419 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 24px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+  }
+
+  .hero-glow-left {
+    top: -20%;
+    left: -10%;
+    width: 50%;
+    height: 70%;
+    background: rgba(139, 92, 246, 0.35);
+  }
+
+  .hero-glow-right {
+    top: -10%;
+    right: -5%;
+    width: 45%;
+    height: 60%;
+    background: rgba(59, 130, 246, 0.3);
+  }
+
+  .map-shell {
+    @apply bg-black;
+    height: clamp(480px, 55vh, 640px);
+    min-height: 480px;
+  }
+
+  .chart-slideshow-inner {
+    @apply mx-auto w-full max-w-2xl;
+  }
+
+  .chart-slideshow-canvas {
+    @apply mx-auto w-full max-w-xl;
+  }
 }
 
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #0f1419;
+  background: #000000;
   font-family: inherit;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply bg-surface-card text-gray-100 rounded-lg border border-surface-border;
+  @apply bg-black text-white rounded-lg;
 }
 
 .leaflet-popup-tip {
-  @apply bg-surface-card;
+  @apply bg-black;
 }

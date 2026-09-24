@@ -5,10 +5,8 @@ export default function DataSourceBadge({ config }: { config: DashboardConfig })
 
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        isReal
-          ? "border border-green-500/40 bg-green-500/10 text-green-400"
-          : "border border-yellow-500/40 bg-yellow-500/10 text-yellow-400"
+      className={`rounded-full px-3 py-1 text-xs font-medium text-white ${
+        isReal ? "bg-green-500/10" : "bg-yellow-500/10"
       }`}
     >
       {isReal ? "Live GEE data" : "Sample data — run pipeline to replace"}

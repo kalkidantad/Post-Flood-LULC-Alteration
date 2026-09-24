@@ -45,6 +45,50 @@ export interface LULCTransition {
   post: string;
   emoji: string;
   area_km2: number;
+  pct_aoi?: number;
+}
+
+export interface FloodRiskArea {
+  label: string;
+  class_id: number;
+  color: string;
+  area_km2: number;
+}
+
+export interface ChartBarItem {
+  label: string;
+  km2: number;
+  color?: string;
+}
+
+export interface DashboardCharts {
+  transitions: ChartBarItem[];
+  flood_risk_by_prior: ChartBarItem[];
+  ml_comparison: ChartBarItem[];
+}
+
+export interface MlComparison {
+  rule_based_km2: number;
+  ml_km2: number;
+  overlap_km2: number;
+  agreement_pct: number;
+}
+
+export interface PixelInspection {
+  lat: number;
+  lng: number;
+  mndwi_pre: number;
+  mndwi_flood: number;
+  ndwi_pre: number;
+  ndwi_flood: number;
+  lulc_pre: string;
+  lulc_flood: string;
+  permanent_water: boolean;
+  valid_pixel: boolean;
+  classification: string;
+  classification_color: string;
+  ml_class: string;
+  rules: { ok: boolean; text: string; icon: string }[];
 }
 
 export interface ChangeStats {
@@ -56,11 +100,13 @@ export interface ChangeStats {
     model_accuracy: number;
     kappa: number;
     oob_error: number;
-    /** Rule-based vs K-means overlap % (K-means has no ground-truth accuracy) */
     ml_agreement_pct?: number;
   };
   kpi: TerraTraceKPI;
   transitions: LULCTransition[];
+  flood_risk?: FloodRiskArea[];
+  ml_comparison?: MlComparison;
+  charts?: DashboardCharts;
   classes: ChangeClass[];
   periods: {
     pre: Period;
@@ -82,7 +128,6 @@ export interface DashboardConfig {
   eeAssets: Record<string, string>;
   dataSource?: "sample" | "real";
   eventDate?: string;
-  /** Optional GEE map tile URLs keyed by MapLayerId (from merge or manual) */
   mapTileLayers?: Partial<Record<MapLayerId, string>>;
 }
 
@@ -134,3 +179,4 @@ export interface LimeExplanations {
 }
 
 export type TimePeriod = "pre" | "post_immediate" | "post_persistence";
+export type MapViewMode = "main" | "swipe";
