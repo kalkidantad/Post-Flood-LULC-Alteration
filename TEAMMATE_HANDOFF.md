@@ -96,14 +96,6 @@ cd dashboard && npm run dev
 
 Open http://localhost:3000 — yellow “demo” badge should disappear when real tiles are wired.
 
-### 5. Deploy dashboard (Vercel / GitHub Pages)
-
-**Who:** Frontend teammate
-
-- Deploy `dashboard/` folder (Next.js)
-- Set env vars for `NEXT_PUBLIC_EE_TILE_*` in hosting provider
-- Confirm map layers toggle correctly on production URL
-
 ---
 
 ## 🟢 Nice to have / polish
