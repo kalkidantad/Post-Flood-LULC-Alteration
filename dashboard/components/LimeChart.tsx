@@ -13,34 +13,45 @@ import {
 } from "recharts";
 import type { LimeFeatureWeight, LimeLocalExplanation } from "@/lib/types";
 
+interface LimeGlobalChartProps {
+  globalData: LimeFeatureWeight[];
+  method?: string;
+  hideHeader?: boolean;
+}
+
+interface LimeLocalChartProps {
+  localSamples: LimeLocalExplanation[];
+  hideHeader?: boolean;
+}
+
 interface LimeChartProps {
   globalData: LimeFeatureWeight[];
   localSamples: LimeLocalExplanation[];
   method: string;
 }
 
-export default function LimeChart({
+export function LimeGlobalChart({
   globalData,
-  localSamples,
   method,
-}: LimeChartProps) {
+  hideHeader = false,
+}: LimeGlobalChartProps) {
   const sorted = [...globalData]
     .filter((d) => (d.importance_pct ?? 0) > 0)
     .sort((a, b) => (b.importance_pct ?? 0) - (a.importance_pct ?? 0))
     .slice(0, 12);
 
-  const [selectedId, setSelectedId] = useState(localSamples[0]?.id ?? "");
-  const selected = localSamples.find((s) => s.id === selectedId);
-
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div>
-        <h2 className="text-sm font-medium uppercase tracking-wider text-gray-400">
-          LIME — Global feature influence
-        </h2>
-        <p className="mt-1 text-xs text-gray-500">{method}</p>
-        <div className="mt-3 min-h-[300px]">
-          <ResponsiveContainer width="100%" height={300}>
+    <div>
+      {!hideHeader && (
+        <>
+          <h2 className="text-sm font-medium uppercase tracking-wider text-white">
+            LIME — Global feature influence
+          </h2>
+          {method && <p className="mt-1 text-xs text-white">{method}</p>}
+        </>
+      )}
+      <div className={hideHeader ? "h-[320px]" : "mt-3 min-h-[300px]"}>
+        <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={sorted}
               layout="vertical"
@@ -60,7 +71,7 @@ export default function LimeChart({
               />
               <Tooltip
                 contentStyle={{
-                  background: "#1a2332",
+                  background: "#000000",
                   border: "1px solid #2d3a4f",
                   borderRadius: 8,
                   fontSize: 12,
@@ -75,22 +86,36 @@ export default function LimeChart({
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+    </div>
+  );
+}
 
-      <div>
-        <h2 className="text-sm font-medium uppercase tracking-wider text-gray-400">
-          LIME — Local explanation
-        </h2>
-        <p className="mt-1 text-xs text-gray-500">
-          Why did the model classify this pixel?
-        </p>
+export function LimeLocalChart({
+  localSamples,
+  hideHeader = false,
+}: LimeLocalChartProps) {
+  const [selectedId, setSelectedId] = useState(localSamples[0]?.id ?? "");
+  const selected = localSamples.find((s) => s.id === selectedId);
 
-        {localSamples.length > 0 ? (
+  return (
+    <div>
+      {!hideHeader && (
+        <>
+          <h2 className="text-sm font-medium uppercase tracking-wider text-white">
+            LIME — Local explanation
+          </h2>
+          <p className="mt-1 text-xs text-white">
+            Why did the model classify this pixel?
+          </p>
+        </>
+      )}
+
+      {localSamples.length > 0 ? (
           <>
             <select
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
-              className="mt-3 w-full rounded-lg border border-surface-border bg-surface px-3 py-2 text-sm text-gray-200"
+              className="card-inner mt-3 w-full px-3 py-2 text-sm"
             >
               {localSamples.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -100,8 +125,8 @@ export default function LimeChart({
             </select>
 
             {selected && (
-              <div className="mt-3 min-h-[260px]">
-                <ResponsiveContainer width="100%" height={260}>
+              <div className={hideHeader ? "mt-3 h-[280px]" : "mt-3 min-h-[260px]"}>
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={selected.features}
                     layout="vertical"
@@ -120,7 +145,7 @@ export default function LimeChart({
                     />
                     <Tooltip
                       contentStyle={{
-                        background: "#1a2332",
+                        background: "#000000",
                         border: "1px solid #2d3a4f",
                         borderRadius: 8,
                         fontSize: 12,
@@ -137,19 +162,31 @@ export default function LimeChart({
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-white">
                   Blue = pushes toward <strong>{selected.class_name}</strong>; red = pushes away.
                 </p>
               </div>
             )}
           </>
         ) : (
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-white">
             No local LIME samples yet. Run{" "}
             <code className="text-accent">python scripts/run_lime_xai.py</code>.
           </p>
         )}
-      </div>
+    </div>
+  );
+}
+
+export default function LimeChart({
+  globalData,
+  localSamples,
+  method,
+}: LimeChartProps) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <LimeGlobalChart globalData={globalData} method={method} />
+      <LimeLocalChart localSamples={localSamples} />
     </div>
   );
 }

@@ -37,15 +37,15 @@ export default function MapLegend({ legendType }: MapLegendProps) {
   }
 
   return (
-    <div className="absolute bottom-4 right-4 z-[1000] max-w-[200px] rounded-lg border border-surface-border bg-surface-card/95 px-3 py-2 backdrop-blur">
-      <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-gray-400">
+    <div className="absolute bottom-4 right-4 z-[1000] max-w-[200px] rounded-lg bg-black/95 px-3 py-2 backdrop-blur ring-1 ring-white/10">
+      <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-white">
         {title}
       </p>
       <ul className="space-y-1">
         {items.map((item) => (
-          <li key={item.label} className="flex items-center gap-2 text-xs text-gray-200">
+          <li key={item.label} className="flex items-center gap-2 text-xs text-white">
             <span
-              className="h-3 w-3 shrink-0 rounded-sm border border-white/10"
+              className="h-3 w-3 shrink-0 rounded-sm"
               style={{ backgroundColor: item.color }}
             />
             {item.emoji ? `${item.emoji} ` : ""}

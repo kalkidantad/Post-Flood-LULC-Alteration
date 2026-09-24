@@ -9,10 +9,10 @@ export default function Header({ config }: HeaderProps) {
   const brand = config.brand ?? "TerraTrace";
 
   return (
-    <header className="border-b border-surface-border bg-surface-card px-6 py-4">
+    <header className="border-b border-surface-border bg-black px-6 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex shrink-0 flex-col items-center justify-center rounded-lg border border-accent/30 bg-gradient-to-br from-accent/20 to-accent/5 px-3 py-2">
+          <div className="flex shrink-0 flex-col items-center justify-center rounded-lg bg-gradient-to-br from-accent/20 to-accent/5 px-3 py-2">
             <span className="text-lg font-bold tracking-wider text-white">
               {brand}
             </span>
@@ -24,7 +24,7 @@ export default function Header({ config }: HeaderProps) {
             <h1 className="text-lg font-semibold tracking-tight text-white">
               {config.title}
             </h1>
-            <p className="text-sm text-gray-400">{config.subtitle}</p>
+            <p className="text-sm text-white">{config.subtitle}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -32,12 +32,12 @@ export default function Header({ config }: HeaderProps) {
           {config.dataSources.map((src) => (
             <span
               key={src}
-              className="rounded-full border border-surface-border bg-surface px-3 py-1 text-gray-300"
+              className="rounded-full bg-black px-3 py-1 text-white ring-1 ring-white/10"
             >
               {src}
             </span>
           ))}
-          <span className="rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-accent">
+          <span className="rounded-full bg-accent/10 px-3 py-1 text-white">
             {config.mlModel}
           </span>
         </div>

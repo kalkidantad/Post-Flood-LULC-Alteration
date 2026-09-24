@@ -5,6 +5,7 @@ import type {
   DashboardConfig,
   FeatureImportance,
   LimeExplanations,
+  PixelInspection,
 } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "public", "data");
@@ -19,11 +20,12 @@ async function loadJson<T>(filename: string): Promise<T | null> {
 }
 
 export async function loadDashboardData() {
-  const [config, stats, featureImportance, lime] = await Promise.all([
+  const [config, stats, featureImportance, lime, pixelSamples] = await Promise.all([
     loadJson<DashboardConfig>("config.json"),
     loadJson<ChangeStats>("change_stats.json"),
     loadJson<FeatureImportance[]>("feature_importance.json"),
     loadJson<LimeExplanations>("lime_explanations.json"),
+    loadJson<PixelInspection[]>("pixel_samples.json"),
   ]);
 
   if (!config || !stats) {
@@ -35,5 +37,6 @@ export async function loadDashboardData() {
     stats,
     featureImportance: featureImportance ?? [],
     lime,
+    pixelSamples: pixelSamples ?? [],
   };
 }

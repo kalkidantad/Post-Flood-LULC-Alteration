@@ -21,20 +21,18 @@ const ITEMS: {
 export default function KPICards({ kpi }: KPICardsProps) {
   return (
     <section>
-      <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-gray-400">
+      <h2 className="mb-3 text-sm font-medium uppercase tracking-wider text-white">
         KPI Cards
       </h2>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         {ITEMS.map(({ key, label, emoji, highlight }) => (
           <div
             key={key}
-            className={`rounded-lg border px-3 py-3 ${
-              highlight
-                ? "border-accent/40 bg-accent/10"
-                : "border-surface-border bg-surface"
+            className={`rounded-lg px-3 py-3 ${
+              highlight ? "bg-accent/10" : "bg-black ring-1 ring-white/10"
             }`}
           >
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-white">
               {emoji} {label}
             </p>
             <p className="mt-1 text-lg font-semibold text-white">
