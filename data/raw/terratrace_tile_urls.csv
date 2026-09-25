@@ -1,0 +1,10 @@
+env_key,url
+NEXT_PUBLIC_EE_TILE_TRANSFORMATION,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/66ca07799103a9fcbbc4d4fbfab28ee2-0162e345481d6eae754f74b527126228/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_BINARY_FLOOD,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/58625c10782e12bf6ae17ccf09c453d6-4fd6e431aea99062f8a4c7cc506e8d13/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_LULC_PRE,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/a4aa47ff2a88f57f8595fba117d2de5b-8eea46e9e0e2f7a8a025acdca20c6c86/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_LULC_FLOOD,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/855d311faaa9e12e762bd510026980a0-7ccf465781e7fc9df448ccf1c98f6a2a/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_LULC_CHANGE,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/3de5fb5263714bad7da1bbcc70509ebb-f1531076aa4c3f09de01e3fee9798912/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_ML_CLASS,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/21645dfb9df9bdc94c3bc2049860b7be-13c067f87854afe5fad9cfc111b9c700/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_FLOOD_RISK,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/36605ce48828349838cc503a4ddc9b87-169781666dc99b10b3a7d13c35f4fdea/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_PRE,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/ff4e3afd08dbb53c30fa8a996c890892-01b5093ef3480fd6aeb19770bd074efd/tiles/{z}/{x}/{y}
+NEXT_PUBLIC_EE_TILE_FLOOD,https://earthengine.googleapis.com/v1/projects/spatiocoretech/maps/d8a24573c17f88596ec09c48e4628806-b8cb255dea72318e1d4a83874c872d78/tiles/{z}/{x}/{y}
